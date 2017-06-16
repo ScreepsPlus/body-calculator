@@ -87,8 +87,8 @@
 	        <td>{{ ::stat.name }}</td>
 	        <td>{{ assoc[stat.part].count*stat.mul*units | num }}<span class="tip">/T</span></td>
 	        <td>{{ assoc[stat.part].count*stat.mul*1500*units | num }}<span class="tip">/1500T</span></td>
-	        <td>{{ assoc[stat.part].count*stat.mul*60*60*units | num }}<span class="tip">/H</span></td>
-	        <td>{{ assoc[stat.part].count*stat.mul*60*60*24*units | num }}<span class="tip">/D</span></td>
+	        <td>{{ assoc[stat.part].count*stat.mul*60*60/4.69*units | num }}<span class="tip">/H</span></td>
+	        <td>{{ assoc[stat.part].count*stat.mul*60*60*24/4.69*units | num }}<span class="tip">/D</span></td>
 	      </tr>
 	      <tr>
 	        <td>carry</td>
