@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<head>
+  <title>ScreepsPlus Creep Calculator</title>
+  <script src="angular.min.js"></script>
+  <script src="main.js"></script>
+  <link rel="stylesheet" href="main.css">
+</head>
+<h1>creep calculator for <a href="https://screeps.com">screeps.com</a></h1>
+<div class="content top" ng-app="calc" ng-controller="parts">
+  <div class="controls">
+    <table>
+      <tr>
+        <th>part/struct</th>
+        <th>price</th>
+        <th>boost</th>
+        <th></th>
+        <th>count </th>
+        <th> </th>
+        <th>sum</th>
+      </tr>
+      <tr ng-repeat="i in parts" ng-class="{have: i.count &amp;&amp; i.mul&lt;0, source: i.count &amp;&amp; i.mul&gt;0, error: i.count&lt;i.min}">
+        <td>{{ i.type }}</td>
+        <td>{{ i.price }}</td>
+        <!--tdselect(id="boost{{ i.type }}" ng-if="boosts[i.type]" ng-model="boosts" ng-options="b.text as b.text for b in boosts[i.type]")
+        -->
+        <td>
+          <button tabindex="-1" ng-click="i.count = i.min">min</button>
+          <button tabindex="-1" ng-click="subtract(i.type)">-</button>
+        </td>
+        <td>
+          <input type="number" ng-model="i.count" size="5">
+        </td>
+        <td>
+          <button tabindex="-1" ng-click="add(i.type)">+</button>
+          <button tabindex="-1" ng-if="i.type!=='spawn'" ng-click="add(i.type, 10)">+10</button>
+        </td>
+        <td>{{ i.count * i.price * i.mul }}</td>
+      </tr>
+      <tr>
+        <th class="left"><span>units*
+            <input type="number" ng-model="units" ng-init="units=1"></span></th>
+        <th></th>
+        <th>parts</th>
+        <th ng-class="{error: getPartsCount()&gt;50}">{{ getPartsCount() | num:0 }}<span title="all parts">({{ getPartsCount()*units | num:0 }})</span></th>
+        <th>sum</th>
+        <th>{{ getSum()*units | num }}</th>
+      </tr>
+      <tr>
+        <th class="left">
+          <label for="controllerLevelId">controller: </label>
+          <select id="controllerLevelId" ng-model="controllerLevel" ng-options="l as l.text for l in controllerLevels"></select>
+        </th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th title="number of units keeps builded from one source">per source</th>
+        <th>{{ (1500/300*3000 / getSum() / units) | num }}</th>
+      </tr>
+      <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>balance</th>
+        <th ng-class="{error: getBalance()&lt;0}">{{ getBalance() | num }}</th>
+      </tr>
+    </table>
+    <div>
+      <div class="fr">
+        <button ng-click="parseInput()">parse</button>
+        <button ng-click="reset()">reset</button>
+      </div>
+      <div>
+        <label for="inputTextId">field to parse body array</label>
+        <textarea id="inputTextId" ng-model="inputText" rows="2"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="stats">
+    <table class="stats" border="1">
+      <tr>
+        <td>health:</td>
+        <td colspan="4">{{ getPartsCount()*100*units | num }} (by TOUGH {{assoc['TOUGH'].count*100*units  | num }})</td>
+      </tr>
+      <tr ng-repeat="stat in [				{name: 'harvest', part: 'WORK', mul: 2},				{name: 'upgradeController', part: 'WORK', mul: 1},				{name: 'build walls/ramparts', part: 'WORK', mul: 100},				{name: 'build structures', part: 'WORK', mul: 5},				{name: 'attack', part: 'ATTACK', mul: 30},				{name: 'ranged attack', part: 'RANGED_ATTACK', mul: 10},				{name: 'mass attack 1', part: 'RANGED_ATTACK', mul: 10},				{name: 'mass attack 2', part: 'RANGED_ATTACK', mul: 4},				{name: 'mass attack 3', part: 'RANGED_ATTACK', mul: 1},				{name: 'heal', part: 'HEAL', mul: 10},				{name: 'ranged heal', part: 'HEAL', mul: 4},				]">
+        <td>{{ ::stat.name }}</td>
+        <td>{{ assoc[stat.part].count*stat.mul*units | num }}<span class="tip">/T</span></td>
+        <td>{{ assoc[stat.part].count*stat.mul*1500*units | num }}<span class="tip">/1500T</span></td>
+        <td>{{ assoc[stat.part].count*stat.mul*60*60*units | num }}<span class="tip">/H</span></td>
+        <td>{{ assoc[stat.part].count*stat.mul*60*60*24*units | num }}<span class="tip">/D</span></td>
+      </tr>
+      <tr>
+        <td>carry</td>
+        <td colspan="4">{{ assoc['CARRY'].count*50*units | num }}</td>
+      </tr>
+      <tr>
+        <td>walk time empty,full</td>
+        <td colspan="4"><span ng-repeat="place in [						{name: 'plain', k:1},						{name: 'road', k:0.5},						{name: 'swamp', k:5},					]">{{ place.name }}=<span>{{ getWait(place.k, false) }},</span><span>{{ getWait(place.k, true) }}&nbsp;&nbsp; </span></span></td>
+      </tr>
+    </table>
+    <div>
+      <textarea rows="2" onmouseup="this.select()" ng-value="getParts()"></textarea><br>
+      <div>
+        <textarea rows="1" onmouseup="this.select()" ng-value="getParts(true)"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+<div>links
+  <ul>
+    <li><a href="http://jsonviewer.stack.hu/">good online JSON viewer</a></li>
+  </ul>
+</div>
+<div>changes
+  <ul>
+    <li>2017-06-16 Published on ScreepsPl.us</li>
+    <li>2017-04-28 fixed extensions capacity for rcl7/8</li>
+    <li>2015-08-26 fixed harvest amount</li>
+    <li>2015-10-08 max parts warning set to 50</li>
+    <li>2015-10-14 fixed attack,heal values; added units multiplier; captions shinked;</li>
+  </ul>
+</div>
